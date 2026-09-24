@@ -7,7 +7,23 @@
   function write(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { storageOK = false; return false; } }
   let library = read(KEY + "-library", { art: [], endings: [], read: [] });
   if (!library || !["art", "endings", "read"].every(k => Array.isArray(library[k]))) library = { art: [], endings: [], read: [] };
-  const format = text => String(text ?? "").replaceAll("{name}", state?.name || "夏宁");
+  const format = text => String(text ?? "").replaceAll("{name}", state?.name || "夏宁")
+    .replaceAll("二十八岁的春天", "这个春天")
+    .replaceAll("十七岁的你", "那时的你").replaceAll("十七岁的他", "那时的他")
+    .replaceAll("我七岁时就熟悉的旅游景点", "我从小熟悉的旅游景点")
+    .replaceAll("没有三十岁以后该如何成功的标语", "没有告诉他何时该成功的标语")
+    .replaceAll("你说不能因为他比自己小两岁，就替他冒领身份。", "你说不能因为他没出声，就替他冒领身份。")
+    .replaceAll("你比他大两岁。这个差距没有让你自动成为更懂事的人，也没有让他必须急着证明自己能照顾你。", "你们的人生经历不同。这没有让你自动成为更懂事的人，也没有让他必须急着证明自己能照顾你。")
+    .replaceAll("证明自己足以照顾年长两岁的你", "证明自己足以照顾你")
+    .replaceAll("闻照，二十六岁，", "闻照任职于")
+    .replaceAll("他二十六岁，在", "他在")
+    .replaceAll("那时他像一个二十六岁的人，而不是一封很长的自我介绍。他低头把面包屑拢到袋子里，说其实现在也是二十六，只是很擅长把自己说老。", "那时他终于像一个愿意坐下来好好吃饭的人，而不是一封很长的自我介绍。他低头把面包屑拢到袋子里，说自己只是很擅长把话说得过于严肃。")
+    .replaceAll("十七岁时", "高中时").replaceAll("十七岁", "高中时期")
+    .replaceAll("二十八岁这一年", "这一年").replaceAll("二十六岁那年", "那年")
+    .replaceAll("比你小两岁", "比你年纪小").replaceAll("比他大两岁", "比他年纪大")
+    .replaceAll("两岁的距离", "彼此的距离")
+    .replace(/(?:[零一二两三四五六七八九十百]+|\d+)\s*岁(?:以后|那年|时|的)?/g, "")
+    .replace(/，{2,}/g, "，").replace(/，。/g, "。");
   function node(tag, text, cls) { const e = document.createElement(tag); if (text !== undefined) e.textContent = format(text); if (cls) e.className = cls; return e; }
   function button(text, action, cls) { const b = node("button", text, cls); b.type = "button"; b.onclick = action; return b; }
   function image(id, cls) { const im = node("img", undefined, cls); im.src = `v3-${id}.jpg`; im.alt = B.assets[id] || "剧情插图"; im.decoding = "async"; return im; }
@@ -17,7 +33,7 @@
   $("close").onclick = close;
   $("dialog").addEventListener("cancel", () => focusBefore?.focus());
   function reveal(art) { if (!art || !B.assets[art]) return; if (!library.art.includes(art)) { library.art.push(art); write(KEY + "-library", library); } }
-  function fullArt(art) { modal(B.assets[art]).append(image(art, "modal-art")); }
+  function fullArt(art) { modal("查看插图").append(image(art, "modal-art")); }
   function paragraphs(parent, text) {
     for (const line of format(text).split(/\n\s*\n/).filter(Boolean)) {
       const m = line.match(/^([^：\n]{1,8})：([\s\S]+)/);
@@ -47,18 +63,17 @@
     show("reader");
     const art = state.pending?.art || scene.art;
     reveal(art);
-    $("scene-image").src = `v3-${art}.jpg`; $("scene-image").alt = B.assets[art];
-    $("place").textContent = scene.place;
-    $("art-caption").textContent = format(scene.caption || B.assets[art]);
+    $("scene-image").src = `v3-${art}.jpg`; $("scene-image").alt = format(B.assets[art]);
+    $("place").textContent = format(scene.place);
     $("present").replaceChildren();
     for (const person of scene.present || (scene.focus ? [scene.focus] : [])) $("present").append(node("span", B.people[person].name, "tag"));
-    $("chapter").textContent = scene.chapter;
+    $("chapter").textContent = format(scene.chapter);
     $("kicker").textContent = `${scene.route === "common" ? "你的生活" : B.people[scene.route]?.name || "交会"} / ${state.page + 1} · ${all.length}`;
-    $("title").textContent = scene.title;
+    $("title").textContent = format(scene.title);
     $("text").replaceChildren(); paragraphs($("text"), all[state.page]);
     $("inserts").replaceChildren();
     if (state.page === all.length - 1) for (const art of scene.inserts || []) {
-      reveal(art); const f = node("figure", undefined, "inset-image"); f.append(image(art), node("figcaption", B.assets[art])); $("inserts").append(f);
+      reveal(art); const f = node("figure", undefined, "inset-image"); f.append(image(art)); $("inserts").append(f);
     }
     $("choices").replaceChildren(); $("reaction").hidden = !state.pending;
     if (state.pending) {
@@ -104,11 +119,43 @@
     slot = i; state = record.state; undo = Array.isArray(record.undo) ? record.undo.filter(B.valid).slice(-30) : []; close(); render(false); window.scrollTo(0, 0);
   }
   $("resume").onclick = () => loadSlot(slot);
-  function profiles(id) { const p = B.people[id]; reveal(p.image); reveal(id); const area = modal(p.name); area.append(image(p.image, "modal-art"), node("p", `${p.age} 岁 · ${p.job}`, "eyebrow"), node("p", p.intro), node("p", p.history), node("h3", "最初的相遇"), image(id, "modal-art")); }
+  function profiles(id) { const p = B.people[id]; reveal(p.image); reveal(id); const area = modal(p.name); area.append(image(p.image, "modal-art"), node("p", p.job, "eyebrow"), node("p", p.intro), node("p", p.history), node("h3", "最初的相遇"), image(id, "modal-art")); }
   Object.entries(B.people).forEach(([id, p]) => {
     const c = button("", () => profiles(id)); c.setAttribute("aria-label", `查看${p.name}的档案`); c.append(image(p.image));
-    const caption = node("div", undefined, "label"); caption.append(node("small", `${p.age} · ${p.job.split(" · ")[0]}`), node("strong", p.name)); c.append(caption); $("cast").append(c);
+    const caption = node("div", undefined, "label"); caption.append(node("strong", p.name)); c.append(caption); $("cast").append(c);
   });
+  let introAnimation, introStopped = false;
+  const endIntro = () => {
+    introStopped = true; introAnimation?.cancel();
+    try { sessionStorage.setItem(KEY + "-intro-seen", "1"); } catch { /* Private browsing may disable storage. */ }
+    document.body.classList.remove("intro-playing");
+    $("intro").hidden = true; $("intro-portrait").replaceChildren();
+    [...$("cast").children].forEach(card => { card.style.visibility = ""; });
+  };
+  $("skip-intro").onclick = endIntro;
+  async function playIntro() {
+    const cards = [...$("cast").children];
+    let seen = false;
+    try { seen = !!sessionStorage.getItem(KEY + "-intro-seen"); } catch { /* The animation still works without storage. */ }
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || seen) { endIntro(); return; }
+    document.body.classList.add("intro-playing"); cards.forEach(card => { card.style.visibility = "hidden"; });
+    for (const card of cards) {
+      if (introStopped) break;
+      const overlay = node("div", undefined, "intro-hero"); overlay.setAttribute("aria-hidden", "true");
+      overlay.append(card.querySelector("img").cloneNode(), node("strong", card.querySelector("strong").textContent));
+      $("intro-portrait").replaceChildren(overlay);
+      const box = card.getBoundingClientRect();
+      introAnimation = overlay.animate([
+        { transform: "translate(0,0) scale(1)", opacity: 1, borderRadius: "0" },
+        { transform: `translate(${box.left}px,${box.top}px) scale(${box.width / innerWidth},${box.height / innerHeight})`, opacity: 1, borderRadius: "50px" }
+      ], { duration: 950, easing: "cubic-bezier(.16,1,.3,1)", fill: "forwards" });
+      try { await introAnimation.finished; } catch { break; }
+      card.style.visibility = "visible";
+      $("intro").classList.add("is-finishing");
+    }
+    endIntro();
+  }
+  playIntro();
   function journal() {
     const a = modal("我留下的痕迹");
     if (!state) { a.append(node("p", "从一个普通的早晨开始，故事会在这里留下痕迹。")); return; }
@@ -177,14 +224,13 @@
   $("menu").onclick = () => {
     const a = modal("属于你的手账"), grid = node("div", undefined, "menu-grid");
     [["选择与线索", journal], ["存档 / 导入导出", slots], ["回忆图鉴", gallery], ["结局回收", endingShelf], ["阅读设置", settings], ["分享故事", share]].forEach(([title, fn]) => grid.append(button(title, fn)));
-    a.append(grid, node("p", "开发预览：新版职业与长篇结构正在制作。现实机构仅用作虚构人物的背景；回声项目、争议及相关人员均属虚构。", "muted"));
+    a.append(grid, node("p", "现实机构仅用作虚构人物的背景；回声项目、争议及相关人员均属虚构。", "muted"));
   };
   function finish() {
     const e = B.endings[state.ending]; show("ending"); reveal(e.art);
     if (!library.endings.includes(state.ending)) { library.endings.push(state.ending); write(KEY + "-library", library); }
     const wrap = node("div", undefined, "ending-wrap"); wrap.append(image(e.art), node("p", e.type, "eyebrow"), node("h1", e.title), node("p", e.subtitle, "lead"));
     const text = node("div", undefined, "prose"); paragraphs(text, e.text); wrap.append(text);
-    if (state.route !== "zhou") paragraphs(wrap, "整理工作室时，你在高中练习册里找到一张描图纸。周予白把你的名字写在纸背，正面恰好是一道受力分析题。你把纸对着窗，终于看清那句十七岁时没有读懂的批注：如果她问我愿不愿意，我会说愿意。\n\n你轻轻合上书。晚知道的心意，也不要求你改写现在的选择。");
     wrap.append(button("回到首页", () => { show("cover"); refreshResume(); window.scrollTo(0, 0); }, "primary"), button("回看我的选择", journal, "option"), button("查看结局收藏", endingShelf, "option"));
     $("ending").replaceChildren(wrap); window.scrollTo(0, 0);
   }
