@@ -26,7 +26,12 @@
     .replace(/，{2,}/g, "，").replace(/，。/g, "。");
   function node(tag, text, cls) { const e = document.createElement(tag); if (text !== undefined) e.textContent = format(text); if (cls) e.className = cls; return e; }
   function button(text, action, cls) { const b = node("button", text, cls); b.type = "button"; b.onclick = action; return b; }
-  function image(id, cls) { const im = node("img", undefined, cls); im.src = `v3-${id}.jpg`; im.alt = B.assets[id] || "剧情插图"; im.decoding = "async"; return im; }
+  function setImageSource(im, id) {
+    im.onerror = () => { if (!im.dataset.jpegFallback) { im.dataset.jpegFallback = "1"; im.src = `v3-${id}.jpg`; } };
+    delete im.dataset.jpegFallback;
+    im.src = `v3-${id}.webp`;
+  }
+  function image(id, cls) { const im = node("img", undefined, cls); im.alt = B.assets[id] || "剧情插图"; im.loading = "lazy"; im.decoding = "async"; setImageSource(im, id); return im; }
   function message(text) { $("toast").textContent = text; $("toast").hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { $("toast").hidden = true; }, 4000); }
   function modal(title) { focusBefore = document.activeElement; $("dialog-body").replaceChildren(node("h2", title)); if (!$("dialog").open) $("dialog").showModal(); return $("dialog-body"); }
   function close() { $("dialog").close(); focusBefore?.focus(); }
@@ -63,7 +68,7 @@
     show("reader");
     const art = state.pending?.art || scene.art;
     reveal(art);
-    $("scene-image").src = `v3-${art}.jpg`; $("scene-image").alt = format(B.assets[art]);
+    setImageSource($("scene-image"), art); $("scene-image").alt = format(B.assets[art]);
     $("place").textContent = format(scene.place);
     $("present").replaceChildren();
     for (const person of scene.present || (scene.focus ? [scene.focus] : [])) $("present").append(node("span", B.people[person].name, "tag"));
@@ -121,41 +126,10 @@
   $("resume").onclick = () => loadSlot(slot);
   function profiles(id) { const p = B.people[id]; reveal(p.image); reveal(id); const area = modal(p.name); area.append(image(p.image, "modal-art"), node("p", p.job, "eyebrow"), node("p", p.intro), node("p", p.history), node("h3", "最初的相遇"), image(id, "modal-art")); }
   Object.entries(B.people).forEach(([id, p]) => {
-    const c = button("", () => profiles(id)); c.setAttribute("aria-label", `查看${p.name}的档案`); c.append(image(p.image));
+    const c = button("", () => profiles(id)); c.setAttribute("aria-label", `查看${p.name}的档案`);
+    const portrait = image(p.image); portrait.loading = "eager"; if (id === "gu") portrait.fetchPriority = "high"; c.append(portrait);
     const caption = node("div", undefined, "label"); caption.append(node("strong", p.name)); c.append(caption); $("cast").append(c);
   });
-  let introAnimation, introStopped = false;
-  const endIntro = () => {
-    introStopped = true; introAnimation?.cancel();
-    try { sessionStorage.setItem(KEY + "-intro-seen", "1"); } catch { /* Private browsing may disable storage. */ }
-    document.body.classList.remove("intro-playing");
-    $("intro").hidden = true; $("intro-portrait").replaceChildren();
-    [...$("cast").children].forEach(card => { card.style.visibility = ""; });
-  };
-  $("skip-intro").onclick = endIntro;
-  async function playIntro() {
-    const cards = [...$("cast").children];
-    let seen = false;
-    try { seen = !!sessionStorage.getItem(KEY + "-intro-seen"); } catch { /* The animation still works without storage. */ }
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches || seen) { endIntro(); return; }
-    document.body.classList.add("intro-playing"); cards.forEach(card => { card.style.visibility = "hidden"; });
-    for (const card of cards) {
-      if (introStopped) break;
-      const overlay = node("div", undefined, "intro-hero"); overlay.setAttribute("aria-hidden", "true");
-      overlay.append(card.querySelector("img").cloneNode(), node("strong", card.querySelector("strong").textContent));
-      $("intro-portrait").replaceChildren(overlay);
-      const box = card.getBoundingClientRect();
-      introAnimation = overlay.animate([
-        { transform: "translate(0,0) scale(1)", opacity: 1, borderRadius: "0" },
-        { transform: `translate(${box.left}px,${box.top}px) scale(${box.width / innerWidth},${box.height / innerHeight})`, opacity: 1, borderRadius: "50px" }
-      ], { duration: 950, easing: "cubic-bezier(.16,1,.3,1)", fill: "forwards" });
-      try { await introAnimation.finished; } catch { break; }
-      card.style.visibility = "visible";
-      $("intro").classList.add("is-finishing");
-    }
-    endIntro();
-  }
-  playIntro();
   function journal() {
     const a = modal("我留下的痕迹");
     if (!state) { a.append(node("p", "从一个普通的早晨开始，故事会在这里留下痕迹。")); return; }
