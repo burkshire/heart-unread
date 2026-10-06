@@ -66,7 +66,7 @@
     const changedScene=renderedScene!==state.scene;renderedScene=state.scene;
     state.page = Math.min(state.page, all.length - 1);
     show("reader");
-    const art = state.pending?.art || scene.art;
+    const art = B.presentationArt(state.pending?.art || scene.art, state);
     reveal(art);
     setImageSource($("scene-image"), art); $("scene-image").alt = format(B.assets[art]);
     $("place").textContent = format(scene.place);
@@ -201,9 +201,9 @@
     a.append(grid, node("p", "现实机构仅用作虚构人物的背景；回声项目、争议及相关人员均属虚构。", "muted"));
   };
   function finish() {
-    const e = B.endings[state.ending]; show("ending"); reveal(e.art);
+    const e = B.endings[state.ending], art = B.presentationArt(e.art, state, true); show("ending"); reveal(art);
     if (!library.endings.includes(state.ending)) { library.endings.push(state.ending); write(KEY + "-library", library); }
-    const wrap = node("div", undefined, "ending-wrap"); wrap.append(image(e.art), node("p", e.type, "eyebrow"), node("h1", e.title), node("p", e.subtitle, "lead"));
+    const wrap = node("div", undefined, "ending-wrap"); wrap.append(image(art), node("p", e.type, "eyebrow"), node("h1", e.title), node("p", e.subtitle, "lead"));
     const text = node("div", undefined, "prose"); paragraphs(text, e.text); wrap.append(text);
     wrap.append(button("回到首页", () => { show("cover"); refreshResume(); window.scrollTo(0, 0); }, "primary"), button("回看我的选择", journal, "option"), button("查看结局收藏", endingShelf, "option"));
     $("ending").replaceChildren(wrap); window.scrollTo(0, 0);
