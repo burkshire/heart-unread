@@ -1,6 +1,8 @@
 "use strict";
 (() => {
   const B = window.CITY, $ = id => document.getElementById(id), KEY = "heart-unread-city-v3";
+  // Keep the saved art IDs while invalidating only the repaired image files.
+  const ART_REVISIONS = { lz6: "2e5756f9185f", "gu-records": "c4ce85fd4cea", "lu-hairdry-v2": "a05b66e7969b" };
   let state = null, undo = [], slot = 0, storageOK = true, focusBefore, toastTimer, renderedScene;
   const copy = x => JSON.parse(JSON.stringify(x));
   function read(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } }
@@ -27,9 +29,10 @@
   function node(tag, text, cls) { const e = document.createElement(tag); if (text !== undefined) e.textContent = format(text); if (cls) e.className = cls; return e; }
   function button(text, action, cls) { const b = node("button", text, cls); b.type = "button"; b.onclick = action; return b; }
   function setImageSource(im, id) {
-    im.onerror = () => { if (!im.dataset.jpegFallback) { im.dataset.jpegFallback = "1"; im.src = `v3-${id}.jpg`; } };
+    const suffix = ART_REVISIONS[id] ? `?v=${ART_REVISIONS[id]}` : "";
+    im.onerror = () => { if (!im.dataset.jpegFallback) { im.dataset.jpegFallback = "1"; im.src = `v3-${id}.jpg${suffix}`; } };
     delete im.dataset.jpegFallback;
-    im.src = `v3-${id}.webp`;
+    im.src = `v3-${id}.webp${suffix}`;
   }
   function image(id, cls) { const im = node("img", undefined, cls); im.alt = B.assets[id] || "剧情插图"; im.loading = "lazy"; im.decoding = "async"; setImageSource(im, id); return im; }
   function message(text) { $("toast").textContent = text; $("toast").hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { $("toast").hidden = true; }, 4000); }
