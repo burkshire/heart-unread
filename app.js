@@ -3,7 +3,8 @@
   const B = window.CITY, $ = id => document.getElementById(id), KEY = "heart-unread-city-v3";
   // Keep the saved art IDs while invalidating only the repaired image files.
   const ART_REVISIONS = { lz6: "2e5756f9185f", "gu-records": "c4ce85fd4cea", "lu-hairdry-v2": "a05b66e7969b" };
-  let state = null, undo = [], slot = 0, storageOK = true, focusBefore, toastTimer, renderedScene;
+  let state = null, undo = [], slot = 0, storageOK = true, focusBefore, toastTimer, renderedScene, activityUI;
+  let displayedArt = null, readerArtDeck = [], readerArtIndex = 0;
   const copy = x => JSON.parse(JSON.stringify(x));
   function read(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } }
   function write(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { storageOK = false; return false; } }
@@ -28,20 +29,46 @@
     .replace(/，{2,}/g, "，").replace(/，。/g, "。");
   function node(tag, text, cls) { const e = document.createElement(tag); if (text !== undefined) e.textContent = format(text); if (cls) e.className = cls; return e; }
   function button(text, action, cls) { const b = node("button", text, cls); b.type = "button"; b.onclick = action; return b; }
-  function setImageSource(im, id) {
+  function imageURL(id, jpeg = false) {
     const suffix = ART_REVISIONS[id] ? `?v=${ART_REVISIONS[id]}` : "";
-    im.onerror = () => { if (!im.dataset.jpegFallback) { im.dataset.jpegFallback = "1"; im.src = `v3-${id}.jpg${suffix}`; } };
+    return jpeg ? `v3-${id}.jpg${suffix}` : `v3-${id}.webp${suffix}`;
+  }
+  function setImageSource(im, id) {
+    im.onerror = () => { if (!im.dataset.jpegFallback) { im.dataset.jpegFallback = "1"; im.src = imageURL(id, true); } };
     delete im.dataset.jpegFallback;
-    im.src = `v3-${id}.webp${suffix}`;
+    im.src = imageURL(id);
   }
   function image(id, cls) { const im = node("img", undefined, cls); im.alt = B.assets[id] || "剧情插图"; im.loading = "lazy"; im.decoding = "async"; setImageSource(im, id); return im; }
   function message(text) { $("toast").textContent = text; $("toast").hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { $("toast").hidden = true; }, 4000); }
-  function modal(title) { focusBefore = document.activeElement; $("dialog-body").replaceChildren(node("h2", title)); if (!$("dialog").open) $("dialog").showModal(); return $("dialog-body"); }
-  function close() { $("dialog").close(); focusBefore?.focus(); }
+  function modal(title) { activityUI?.pause(); focusBefore = document.activeElement; $("dialog-body").replaceChildren(node("h2", title)); if (!$("dialog").open) $("dialog").showModal(); return $("dialog-body"); }
+  function close() { $("dialog").close(); focusBefore?.focus(); if (activityUI?.hasPaused()) { render(false); $("choices").querySelector(".continue")?.focus({ preventScroll: true }); } }
   $("close").onclick = close;
-  $("dialog").addEventListener("cancel", () => focusBefore?.focus());
+  $("dialog").addEventListener("cancel", event => { event.preventDefault(); close(); });
   function reveal(art) { if (!art || !B.assets[art]) return; if (!library.art.includes(art)) { library.art.push(art); write(KEY + "-library", library); } }
   function fullArt(art) { modal("查看插图").append(image(art, "modal-art")); }
+  function displayReaderArt(art) {
+    if (!B.assets[art]) return;
+    displayedArt = art; reveal(art);
+    const im = $("scene-image"); im.alt = format(B.assets[art]);
+    im.onload = () => $("scene-figure").classList.toggle("landscape", im.naturalWidth > im.naturalHeight);
+    setImageSource(im, art);
+  }
+  function readerArtControls() {
+    const area = $("art-controls"); area.replaceChildren(); area.hidden = readerArtDeck.length < 2;
+    if (area.hidden) return;
+    const previous = button("上一幅", () => change(-1), "art-step"), next = button("下一幅", () => change(1), "art-step");
+    const count = node("span", `${readerArtIndex + 1} / ${readerArtDeck.length}`, "art-count"); count.setAttribute("role", "status");
+    const update = () => { count.textContent = `${readerArtIndex + 1} / ${readerArtDeck.length}`; previous.disabled = readerArtIndex === 0; next.disabled = readerArtIndex === readerArtDeck.length - 1; };
+    const change = delta => { readerArtIndex = Math.max(0, Math.min(readerArtDeck.length - 1, readerArtIndex + delta)); displayReaderArt(readerArtDeck[readerArtIndex]); update(); };
+    area.append(previous, count, next); update();
+  }
+  function sceneArt(scene, pageCount) {
+    const primary = B.presentationArt(state.pending?.art || scene.art, state);
+    const eventArt = state.pending?.art && state.pending.art !== scene.art;
+    readerArtDeck = [...new Set([primary, ...(eventArt ? [] : (scene.inserts || []).map(art => B.presentationArt(art, state)))])].filter(art => B.assets[art]);
+    readerArtIndex = state.pending ? 0 : Math.min(readerArtDeck.length - 1, Math.floor(state.page * readerArtDeck.length / pageCount));
+    displayReaderArt(readerArtDeck[readerArtIndex]); readerArtControls();
+  }
   function paragraphs(parent, text) {
     for (const line of format(text).split(/\n\s*\n/).filter(Boolean)) {
       const m = line.match(/^([^：\n]{1,8})：([\s\S]+)/);
@@ -69,9 +96,7 @@
     const changedScene=renderedScene!==state.scene;renderedScene=state.scene;
     state.page = Math.min(state.page, all.length - 1);
     show("reader");
-    const art = B.presentationArt(state.pending?.art || scene.art, state);
-    reveal(art);
-    setImageSource($("scene-image"), art); $("scene-image").alt = format(B.assets[art]);
+    sceneArt(scene, all.length);
     $("place").textContent = format(scene.place);
     $("present").replaceChildren();
     for (const person of scene.present || (scene.focus ? [scene.focus] : [])) $("present").append(node("span", B.people[person].name, "tag"));
@@ -79,11 +104,8 @@
     $("kicker").textContent = `${scene.route === "common" ? "你的生活" : B.people[scene.route]?.name || "交会"} / ${state.page + 1} · ${all.length}`;
     $("title").textContent = format(scene.title);
     $("text").replaceChildren(); paragraphs($("text"), all[state.page]);
-    $("inserts").replaceChildren();
-    if (state.page === all.length - 1) for (const art of scene.inserts || []) {
-      reveal(art); const f = node("figure", undefined, "inset-image"); f.append(image(art)); $("inserts").append(f);
-    }
     $("choices").replaceChildren(); $("reaction").hidden = !state.pending;
+    const activityOwnsChoices = activityUI.render(scene, !state.pending && state.page === all.length - 1);
     if (state.pending) {
       $("reaction").replaceChildren(node("p", "这一次，你的回答", "eyebrow")); paragraphs($("reaction"), state.pending.response);
       for (const witness of state.pending.witnesses) {
@@ -94,7 +116,7 @@
     } else if (state.page < all.length - 1) {
       $("choices").append(button("继续阅读 →", () => { state.page++; render(); save(); }, "option continue"));
       if (library.read.includes(scene.id)) $("choices").append(button("跳过已读正文", () => { state.page = all.length - 1; render(); save(); }, "option"));
-    } else {
+    } else if (!activityOwnsChoices) {
       if (!library.read.includes(scene.id)) { library.read.push(scene.id); write(KEY + "-library", library); }
       scene.choices.forEach(o => {
         if (o.require && !o.require(state)) return;
@@ -102,15 +124,15 @@
       });
     }
     $("back").disabled = !undo.length;
-    $("view-art").onclick = () => fullArt(art);
+    $("view-art").onclick = () => fullArt(displayedArt);
     if (scroll) { $("title").focus({ preventScroll: true }); (state.pending ? $("reaction") : changedScene ? $("scene-figure") : $("title")).scrollIntoView({ block: "start" }); }
     save();
   }
-  function choose(id) { undo.push(copy(state)); undo = undo.slice(-30); state = B.select(state, id); render(); }
-  function advance() { state = B.advance(state); render(); }
+  function choose(id) { activityUI.pause(); undo.push(copy(state)); undo = undo.slice(-30); state = B.select(state, id); render(); }
+  function advance() { activityUI.pause(); state = B.advance(state); render(); }
   function begin(name) {
     const seed = new Uint32Array(1); crypto.getRandomValues(seed);
-    state = B.create(name, seed[0]); undo = []; render(false); window.scrollTo(0, 0); save();
+    activityUI.pause(); state = B.create(name, seed[0]); undo = []; render(false); window.scrollTo(0, 0); save();
   }
   $("start").onsubmit = e => {
     e.preventDefault(); const name = $("name").value.trim(); if (!name) { $("name").focus(); return; } $("name").blur();
@@ -119,11 +141,12 @@
       area.append(button("确认重新开始", () => { close(); begin(name); }, "primary"));
     } else begin(name);
   };
-  $("back").onclick = () => { if (undo.length) { state = undo.pop(); render(); } };
-  $("home").onclick = () => { save(); show("cover"); refreshResume(); window.scrollTo(0, 0); };
+  $("back").onclick = () => { activityUI.pause(); if (undo.length) { state = undo.pop(); render(); } };
+  $("home").onclick = () => { activityUI.pause(); save(); show("cover"); refreshResume(); window.scrollTo(0, 0); };
   function refreshResume() { slot = [0, 1, 2].includes(read(KEY + "-active", 0)) ? read(KEY + "-active", 0) : 0; $("resume").hidden = !B.valid(read(KEY + "-slot-" + slot, null)?.state); }
   function loadSlot(i) {
     const record = read(KEY + "-slot-" + i, null); if (!B.valid(record?.state)) { message("这个槽位没有可读取的存档。"); return; }
+    activityUI.pause();
     slot = i; state = record.state; undo = Array.isArray(record.undo) ? record.undo.filter(B.valid).slice(-30) : []; close(); render(false); window.scrollTo(0, 0);
   }
   $("resume").onclick = () => loadSlot(slot);
@@ -204,6 +227,7 @@
     a.append(grid, node("p", "现实机构仅用作虚构人物的背景；回声项目、争议及相关人员均属虚构。", "muted"));
   };
   function finish() {
+    activityUI.cancel();
     const e = B.endings[state.ending], art = B.presentationArt(e.art, state, true); show("ending"); reveal(art);
     if (!library.endings.includes(state.ending)) { library.endings.push(state.ending); write(KEY + "-library", library); }
     const wrap = node("div", undefined, "ending-wrap"); wrap.append(image(art), node("p", e.type, "eyebrow"), node("h1", e.title), node("p", e.subtitle, "lead"));
@@ -211,6 +235,9 @@
     wrap.append(button("回到首页", () => { show("cover"); refreshResume(); window.scrollTo(0, 0); }, "primary"), button("回看我的选择", journal, "option"), button("查看结局收藏", endingShelf, "option"));
     $("ending").replaceChildren(wrap); window.scrollTo(0, 0);
   }
+  activityUI = B.createActivityUI({ state: () => state, node, button, save, choose, render, fullArt, imageURL, setImageSource,
+    displayArt: art => { readerArtDeck = [art]; readerArtIndex = 0; displayReaderArt(art); readerArtControls(); }
+  });
   const settingsValue=read(KEY + "-settings", []);
   for (const cls of Array.isArray(settingsValue)?settingsValue:[]) if (["large", "paper"].includes(cls)) document.body.classList.add(cls);
   refreshResume();
