@@ -46,7 +46,7 @@
     clearTimeout(toastTimer); $("toast").textContent = text; $("toast").hidden = false;
     toastTimer = setTimeout(() => { $("toast").hidden = true; }, 2600);
   }
-  function imageURL(id, extension = "webp") { return "assets/" + id + "." + extension; }
+  function imageURL(id, extension = "webp") { return "v3-" + id + "." + extension; }
   function loadImage(id) {
     if (imageCache.has(id)) return imageCache.get(id);
     const request = new Promise((resolve, reject) => {
