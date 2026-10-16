@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4efeb">
+  <meta name="description" content="心动未读画面试映：一张画面，几句心事。点击推进，选择你的靠近方式。">
+  <meta name="demo-version" content="vn-demo-20261016-1">
+  <title>心动未读 · 画面试映</title>
+  <link rel="preload" href="assets/studio.webp" as="image" fetchpriority="high">
+  <link rel="stylesheet" href="demo.css">
+  <script src="demo-story.js" defer></script>
+  <script src="demo.js" defer></script>
+</head>
+<body>
+  <header class="masthead">
+    <a class="wordmark" href="./" aria-label="返回心动未读正式版"><span class="mark" aria-hidden="true">♡</span> 心动未读</a>
+    <span class="masthead-caption">城市回声 <span class="small-divider" aria-hidden="true"></span> 画面试映</span>
+    <button class="top-link" id="chapter-menu">选择片段 <span aria-hidden="true">↗</span></button>
+  </header>
+
+  <main>
+    <section class="theater" id="theater" aria-label="心动未读视觉小说试玩">
+      <div class="scene-wash" id="scene-wash" aria-hidden="true"></div>
+      <img class="artwork" id="artwork" src="assets/studio.webp" alt="晨光落进摆满设计稿的工作室" fetchpriority="high">
+      <div class="scene-shade" aria-hidden="true"></div>
+      <button class="advance-surface" id="advance-surface" aria-label="显示完整对白或继续下一句"></button>
+
+      <div class="scene-hud" id="scene-hud">
+        <div class="scene-badge"><span class="chapter-number" id="chapter-number">序</span><div><span class="chapter-label" id="chapter-label">一个普通的早晨</span><span class="place-label" id="place-label">上海 · 08:17</span></div></div>
+        <div class="hud-actions"><span class="demo-badge">DEMO</span><button class="icon-button" id="fullscreen" aria-label="展开游戏画面" title="展开画面"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4"/></svg></button></div>
+      </div>
+
+      <section class="choice-panel" id="choice-panel" aria-label="选择如何回应" hidden>
+        <p class="choice-kicker">这一刻，听你的。</p>
+        <h2 id="choice-title">先让哪一件事发生？</h2>
+        <div class="choice-list" id="choice-list"></div>
+      </section>
+
+      <section class="dialogue" id="dialogue" aria-label="当前对白">
+        <div class="dialogue-heading"><span class="speaker-dot" aria-hidden="true"></span><strong id="speaker">旁白</strong><span class="speaker-caption" id="speaker-caption">你的生活</span><span class="page-mark" id="page-mark">01</span></div>
+        <div class="dialogue-text" id="dialogue-text" aria-live="polite" aria-atomic="true"></div>
+        <div class="dialogue-footer"><span class="save-indicator" id="save-indicator" aria-hidden="true"></span><button id="next" class="next-button"><span id="next-label">点击继续</span><span class="next-diamond" aria-hidden="true">◇</span></button></div>
+      </section>
+
+      <nav class="game-tools" id="game-tools" aria-label="游戏控制">
+        <div class="tools-left"><button id="back" class="tool-button" aria-label="回到上一句"><span aria-hidden="true">↶</span> 回退</button><button id="history" class="tool-button"><span aria-hidden="true">☷</span> 回看</button></div>
+        <div class="tools-right"><button id="auto" class="tool-button" aria-pressed="false"><span aria-hidden="true">▷</span> 自动</button><button id="save" class="tool-button">存档</button><button id="settings" class="tool-button">设置</button><button id="hide-ui" class="tool-button" aria-label="隐藏对白查看画面">净图</button></div>
+      </nav>
+      <button id="restore-ui" class="restore-ui" hidden>显示对白 <span aria-hidden="true">↙</span></button>
+      <div class="loading-note" id="loading-note" role="status" hidden>正在展开这一幕…</div>
+    </section>
+    <footer class="demo-footer"><p><span class="footer-line" aria-hidden="true"></span> 一张画面，几句心事。</p><span>点击画面继续 <span aria-hidden="true">·</span> 空格 / Enter 推进</span></footer>
+  </main>
+
+  <dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
+    <div class="sheet-header"><div><span class="sheet-kicker" id="sheet-kicker">心动未读</span><h2 id="sheet-title">这一页</h2></div><button class="close-button" id="close-sheet" aria-label="关闭窗口">×</button></div>
+    <div class="sheet-body" id="sheet-body"></div>
+  </dialog>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <noscript><p class="no-script">请开启浏览器 JavaScript 后体验点击对白与剧情分支。</p></noscript>
+</body>
+</html>
