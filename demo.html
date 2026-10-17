@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta name="demo-release" content="45c949063571">
+  <meta name="demo-release" content="0c62a8ebbc32">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f4efeb">
@@ -9,15 +9,14 @@
   <meta name="demo-version" content="vn-demo-20261016-1">
   <title>心动未读 · 画面试映</title>
   <link rel="preload" href="v3-studio.webp" as="image" fetchpriority="high">
-  <link rel="stylesheet" href="demo.css?v=45c949063571">
-  <script src="demo-story.js?v=45c949063571" defer></script>
-  <script src="demo.js?v=45c949063571" defer></script>
+  <link rel="stylesheet" href="demo.css?v=0c62a8ebbc32">
+  <script src="demo-story.js?v=0c62a8ebbc32" defer></script>
+  <script src="demo.js?v=0c62a8ebbc32" defer></script>
 </head>
 <body>
   <header class="masthead">
     <a class="wordmark" href="./" aria-label="返回心动未读正式版"><span class="mark" aria-hidden="true">♡</span> 心动未读</a>
     <span class="masthead-caption">城市回声 <span class="small-divider" aria-hidden="true"></span> 画面试映</span>
-    <button class="top-link" id="chapter-menu">选择片段 <span aria-hidden="true">↗</span></button>
   </header>
 
   <main>
@@ -29,7 +28,7 @@
 
       <div class="scene-hud" id="scene-hud">
         <div class="scene-badge"><span class="chapter-number" id="chapter-number">序</span><div><span class="chapter-label" id="chapter-label">一个普通的早晨</span><span class="place-label" id="place-label">上海 · 08:17</span></div></div>
-        <div class="hud-actions"><span class="demo-badge">DEMO</span><button class="icon-button" id="fullscreen" aria-label="展开游戏画面" title="展开画面"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4"/></svg></button></div>
+        <div class="hud-actions"><span class="demo-badge">DEMO</span><button class="top-link scene-menu" id="chapter-menu">菜单 <span aria-hidden="true">↗</span></button><button class="icon-button" id="fullscreen" aria-label="展开游戏画面" title="展开画面"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4"/></svg></button></div>
       </div>
 
       <section class="choice-panel" id="choice-panel" aria-label="选择如何回应" hidden>
@@ -44,10 +43,6 @@
         <div class="dialogue-footer"><span class="save-indicator" id="save-indicator" aria-hidden="true"></span><button id="next" class="next-button"><span id="next-label">点击继续</span><span class="next-diamond" aria-hidden="true">◇</span></button></div>
       </section>
 
-      <nav class="game-tools" id="game-tools" aria-label="游戏控制">
-        <div class="tools-left"><button id="back" class="tool-button" aria-label="回到上一句"><span aria-hidden="true">↶</span> 回退</button><button id="history" class="tool-button"><span aria-hidden="true">☷</span> 回看</button></div>
-        <div class="tools-right"><button id="auto" class="tool-button" aria-pressed="false"><span aria-hidden="true">▷</span> 自动</button><button id="save" class="tool-button">存档</button><button id="settings" class="tool-button">设置</button><button id="hide-ui" class="tool-button" aria-label="隐藏对白查看画面">净图</button></div>
-      </nav>
       <button id="restore-ui" class="restore-ui" hidden>显示对白 <span aria-hidden="true">↙</span></button>
       <div class="loading-note" id="loading-note" role="status" hidden>正在展开这一幕…</div>
     </section>
@@ -56,6 +51,10 @@
 
   <dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
     <div class="sheet-header"><div><span class="sheet-kicker" id="sheet-kicker">心动未读</span><h2 id="sheet-title">这一页</h2></div><button class="close-button" id="close-sheet" aria-label="关闭窗口">×</button></div>
+    <nav class="menu-tools" id="menu-tools" aria-label="阅读与存档">
+      <button id="back" class="tool-button" aria-label="回到上一句"><span aria-hidden="true">↶</span> 回退</button><button id="history" class="tool-button"><span aria-hidden="true">☷</span> 回看</button>
+      <button id="auto" class="tool-button" aria-pressed="false"><span aria-hidden="true">▷</span> 自动</button><button id="save" class="tool-button">存档</button><button id="settings" class="tool-button">设置</button><button id="hide-ui" class="tool-button" aria-label="隐藏对白查看画面">净图</button>
+    </nav>
     <div class="sheet-body" id="sheet-body"></div>
   </dialog>
   <div class="toast" id="toast" role="status" hidden></div>

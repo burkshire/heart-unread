@@ -116,7 +116,7 @@
     }, prefs.speed);
   }
   function syncClean() {
-    for (const id of ["scene-hud", "dialogue", "game-tools", "choice-panel"]) $(id).hidden = clean || (id === "choice-panel" ? !state.choiceVisible : id === "dialogue" ? state.choiceVisible : false);
+    for (const id of ["scene-hud", "dialogue", "choice-panel"]) $(id).hidden = clean || (id === "choice-panel" ? !state.choiceVisible : id === "dialogue" ? state.choiceVisible : false);
     $("restore-ui").hidden = !clean;
     $("advance-surface").setAttribute("aria-label", clean ? "显示对白" : "显示完整对白或继续下一句");
   }
@@ -168,7 +168,7 @@
     setAuto(false); clean = false; render({ instant: true, animate: false });
   }
   function openSheet(title, kicker = "心动未读") {
-    stopAutoTimer(); dialogReturn = document.activeElement;
+    stopAutoTimer(); if (!$("sheet").open) dialogReturn = document.activeElement;
     $("sheet-title").textContent = title; $("sheet-kicker").textContent = kicker; $("sheet-body").replaceChildren();
     if (!$("sheet").open) $("sheet").showModal();
     $("sheet").scrollTop = 0;
@@ -257,13 +257,13 @@
   $("advance-surface").onclick = event => advance(event.detail === 0);
   $("next").onclick = event => advance(event.detail === 0);
   $("dialogue").onclick = event => { if (!event.target.closest("button")) advance(); };
-  $("back").onclick = back;
+  $("back").onclick = () => { closeSheet(); back(); };
   $("history").onclick = history;
   $("save").onclick = slots;
   $("settings").onclick = settings;
   $("chapter-menu").onclick = chapters;
-  $("auto").onclick = () => { if (current().choices || current().end) { toast("这一刻，等你自己作选择。"); return; } setAuto(!auto); };
-  $("hide-ui").onclick = () => { clean = true; stopAutoTimer(); syncClean(); $("restore-ui").focus({ preventScroll: true }); };
+  $("auto").onclick = () => { if (current().choices || current().end) { toast("这一刻，等你自己作选择。"); return; } closeSheet(); setAuto(!auto); };
+  $("hide-ui").onclick = () => { closeSheet(); clean = true; stopAutoTimer(); syncClean(); $("restore-ui").focus({ preventScroll: true }); };
   $("restore-ui").onclick = () => { clean = false; syncClean(); scheduleAuto(); };
   $("fullscreen").onclick = toggleFullscreen;
   document.addEventListener("fullscreenchange", () => { $("fullscreen").setAttribute("aria-label", document.fullscreenElement ? "收起游戏画面" : "展开游戏画面"); });
