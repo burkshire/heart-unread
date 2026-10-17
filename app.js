@@ -1,9 +1,11 @@
 "use strict";
 (() => {
+  // Earlier shared links used a different DOM but the same V3 saves.
+  if (!document.getElementById("novel-stage")) { location.replace(new URL("./", location.href).href); return; }
   const B = window.CITY, $ = id => document.getElementById(id), KEY = "heart-unread-city-v3";
   // Keep the saved art IDs while invalidating only the repaired image files.
   const ART_REVISIONS = { lz6: "2e5756f9185f", "gu-records": "c4ce85fd4cea", "lu-hairdry-v2": "a05b66e7969b" };
-  let state = null, undo = [], slot = 0, storageOK = true, focusBefore, toastTimer, renderedScene, activityUI;
+  let state = null, undo = [], slot = 0, storageOK = true, focusBefore, toastTimer, activityUI, novel;
   let displayedArt = null, readerArtDeck = [], readerArtIndex = 0;
   const copy = x => JSON.parse(JSON.stringify(x));
   function read(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } }
@@ -40,17 +42,32 @@
   }
   function image(id, cls) { const im = node("img", undefined, cls); im.alt = B.assets[id] || "剧情插图"; im.loading = "lazy"; im.decoding = "async"; setImageSource(im, id); return im; }
   function message(text) { $("toast").textContent = text; $("toast").hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { $("toast").hidden = true; }, 4000); }
-  function modal(title) { activityUI?.pause(); focusBefore = document.activeElement; $("dialog-body").replaceChildren(node("h2", title)); if (!$("dialog").open) $("dialog").showModal(); return $("dialog-body"); }
-  function close() { $("dialog").close(); focusBefore?.focus(); if (activityUI?.hasPaused()) { render(false); $("choices").querySelector(".continue")?.focus({ preventScroll: true }); } }
+  function modal(title) {
+    activityUI?.pause(); novel?.pause();
+    if (!$("dialog").open) focusBefore = document.activeElement;
+    $("dialog-body").replaceChildren(node("h2", title));
+    $("menu-tools").hidden = !state || $("reader").hidden;
+    // A dialog must be a descendant of the native fullscreen element to remain usable.
+    const parent = document.fullscreenElement || document.body;
+    if ($("dialog").parentElement !== parent) parent.append($("dialog"));
+    if (!$("dialog").open) $("dialog").showModal();
+    $("dialog").scrollTop = 0; return $("dialog-body");
+  }
+  function close() { $("dialog").close(); focusBefore?.focus({ preventScroll: true }); if (activityUI?.hasPaused()) render(false); }
   $("close").onclick = close;
   $("dialog").addEventListener("cancel", event => { event.preventDefault(); close(); });
   function reveal(art) { if (!art || !B.assets[art]) return; if (!library.art.includes(art)) { library.art.push(art); write(KEY + "-library", library); } }
   function fullArt(art) { modal("查看插图").append(image(art, "modal-art")); }
   function displayReaderArt(art) {
     if (!B.assets[art]) return;
-    displayedArt = art; reveal(art);
+    reveal(art);
+    if (displayedArt === art && $("scene-image").getAttribute("src")) return;
+    displayedArt = art;
     const im = $("scene-image"); im.alt = format(B.assets[art]);
-    im.onload = () => $("scene-figure").classList.toggle("landscape", im.naturalWidth > im.naturalHeight);
+    im.onload = () => {
+      $("novel-stage").dataset.shape = im.naturalWidth > im.naturalHeight ? "landscape" : "portrait";
+      $("scene-wash").style.backgroundImage = `url("${im.currentSrc || im.src}")`;
+    };
     setImageSource(im, art);
   }
   function readerArtControls() {
@@ -62,11 +79,11 @@
     const change = delta => { readerArtIndex = Math.max(0, Math.min(readerArtDeck.length - 1, readerArtIndex + delta)); displayReaderArt(readerArtDeck[readerArtIndex]); update(); };
     area.append(previous, count, next); update();
   }
-  function sceneArt(scene, pageCount) {
-    const primary = B.presentationArt(state.pending?.art || scene.art, state);
+  function sceneArt(scene, pageCount, pageIndex, ending) {
+    const primary = B.presentationArt(ending?.art || state.pending?.art || scene.art, state, !!ending);
     const eventArt = state.pending?.art && state.pending.art !== scene.art;
-    readerArtDeck = [...new Set([primary, ...(eventArt ? [] : (scene.inserts || []).map(art => B.presentationArt(art, state)))])].filter(art => B.assets[art]);
-    readerArtIndex = state.pending ? 0 : Math.min(readerArtDeck.length - 1, Math.floor(state.page * readerArtDeck.length / pageCount));
+    readerArtDeck = [...new Set([primary, ...(eventArt || ending ? [] : (scene.inserts || []).map(art => B.presentationArt(art, state)))])].filter(art => B.assets[art]);
+    readerArtIndex = state.pending || ending ? 0 : Math.min(readerArtDeck.length - 1, Math.floor(pageIndex * readerArtDeck.length / pageCount));
     displayReaderArt(readerArtDeck[readerArtIndex]); readerArtControls();
   }
   function paragraphs(parent, text) {
@@ -77,59 +94,21 @@
       parent.append(p);
     }
   }
-  function pages(scene) {
-    const blocks = format(typeof scene.text === "function" ? scene.text(state) : scene.text).split(/\n\s*\n/).filter(Boolean);
-    const all = []; let page = [], count = 0;
-    for (const p of blocks) { if (page.length && count + p.length > 380) { all.push(page.join("\n\n")); page = []; count = 0; } page.push(p); count += p.length; }
-    if (page.length) all.push(page.join("\n\n")); return all;
-  }
   function save() {
     if (!state) return;
     write(KEY + "-slot-" + slot, { state, undo: undo.slice(-30), updated: Date.now() }); write(KEY + "-active", slot);
-    $("saved").textContent = storageOK ? `已保存到存档 ${slot + 1} · 仅当前浏览器` : "浏览器暂不能保存，请到手账导出存档。";
+    $("saved").textContent = storageOK ? "·" : "暂不能保存，请从菜单导出";
+    $("saved").setAttribute("aria-label", storageOK ? `已保存到存档 ${slot + 1}` : "浏览器暂不能保存，请到菜单导出存档。");
   }
-  function show(id) { for (const k of ["cover", "reader", "ending"]) $(k).hidden = k !== id; }
+  function show(id) { for (const k of ["cover", "reader", "ending"]) $(k).hidden = k !== id; document.body.classList.toggle("playing", id === "reader"); }
   function render(scroll = true) {
     if (!state) return;
     if (state.ending) { finish(); save(); return; }
-    const scene = B.scenes[state.scene], all = pages(scene);
-    const changedScene=renderedScene!==state.scene;renderedScene=state.scene;
-    state.page = Math.min(state.page, all.length - 1);
-    show("reader");
-    sceneArt(scene, all.length);
-    $("place").textContent = format(scene.place);
-    $("present").replaceChildren();
-    for (const person of scene.present || (scene.focus ? [scene.focus] : [])) $("present").append(node("span", B.people[person].name, "tag"));
-    $("chapter").textContent = format(scene.chapter);
-    $("kicker").textContent = `${scene.route === "common" ? "你的生活" : B.people[scene.route]?.name || "交会"} / ${state.page + 1} · ${all.length}`;
-    $("title").textContent = format(scene.title);
-    $("text").replaceChildren(); paragraphs($("text"), all[state.page]);
-    $("choices").replaceChildren(); $("reaction").hidden = !state.pending;
-    const activityOwnsChoices = activityUI.render(scene, !state.pending && state.page === all.length - 1);
-    if (state.pending) {
-      $("reaction").replaceChildren(node("p", "这一次，你的回答", "eyebrow")); paragraphs($("reaction"), state.pending.response);
-      for (const witness of state.pending.witnesses) {
-        const w = node("div", undefined, "witness");
-        w.append(node("strong", witness.who ? B.people[witness.who].name : "共同项目"), node("div", witness.text)); $("reaction").append(w);
-      }
-      $("choices").append(button("继续这段生活 →", advance, "option continue"));
-    } else if (state.page < all.length - 1) {
-      $("choices").append(button("继续阅读 →", () => { state.page++; render(); save(); }, "option continue"));
-      if (library.read.includes(scene.id)) $("choices").append(button("跳过已读正文", () => { state.page = all.length - 1; render(); save(); }, "option"));
-    } else if (!activityOwnsChoices) {
-      if (!library.read.includes(scene.id)) { library.read.push(scene.id); write(KEY + "-library", library); }
-      scene.choices.forEach(o => {
-        if (o.require && !o.require(state)) return;
-        $("choices").append(button(o.label, () => choose(o.id), `option ${o.kind || ""}`));
-      });
-    }
-    $("back").disabled = !undo.length;
+    show("reader"); novel.render(!scroll);
     $("view-art").onclick = () => fullArt(displayedArt);
-    if (scroll) { $("title").focus({ preventScroll: true }); (state.pending ? $("reaction") : changedScene ? $("scene-figure") : $("title")).scrollIntoView({ block: "start" }); }
-    save();
   }
-  function choose(id) { activityUI.pause(); undo.push(copy(state)); undo = undo.slice(-30); state = B.select(state, id); render(); }
-  function advance() { activityUI.pause(); state = B.advance(state); render(); }
+  function choose(id) { activityUI.pause(); undo.push(copy(state)); undo = undo.slice(-30); state = B.select(state, id); novel.reset("response"); render(); }
+  function advance() { activityUI.pause(); state = B.advance(state); novel.reset(); render(); }
   function begin(name) {
     const seed = new Uint32Array(1); crypto.getRandomValues(seed);
     activityUI.pause(); state = B.create(name, seed[0]); undo = []; render(false); window.scrollTo(0, 0); save();
@@ -141,8 +120,9 @@
       area.append(button("确认重新开始", () => { close(); begin(name); }, "primary"));
     } else begin(name);
   };
-  $("back").onclick = () => { activityUI.pause(); if (undo.length) { state = undo.pop(); render(); } };
-  $("home").onclick = () => { activityUI.pause(); save(); show("cover"); refreshResume(); window.scrollTo(0, 0); };
+  $("back").onclick = () => { close(); novel.back(); };
+  function home() { activityUI.pause(); novel.leave(); save(); show("cover"); refreshResume(); window.scrollTo(0, 0); }
+  $("home").onclick = home;
   function refreshResume() { slot = [0, 1, 2].includes(read(KEY + "-active", 0)) ? read(KEY + "-active", 0) : 0; $("resume").hidden = !B.valid(read(KEY + "-slot-" + slot, null)?.state); }
   function loadSlot(i) {
     const record = read(KEY + "-slot-" + i, null); if (!B.valid(record?.state)) { message("这个槽位没有可读取的存档。"); return; }
@@ -163,6 +143,9 @@
     if (state.evidence.length) { a.append(node("h3", "已确认的细节")); state.evidence.forEach(v => a.append(node("p", v))); }
     [...state.journal].reverse().forEach(entry => { const e = node("section", undefined, "entry"); e.append(node("strong", entry.title), node("p", entry.choice), node("p", entry.response, "muted")); a.append(e); });
   }
+  function history() { const a = modal("刚刚说过的话"); if (state) novel.history(a); else a.append(node("p", "故事还没有开始。")); }
+  $("history").onclick = history;
+  $("save").onclick = slots;
   function gallery() {
     const area = modal("回忆里的光"); area.append(node("p", `已解锁 ${library.art.length} / ${Object.keys(B.assets).length} 幅。插图会随剧情自然解锁。`));
     const grid = node("div", undefined, "gallery-grid");
@@ -211,7 +194,9 @@
   }
   function settings() {
     const a = modal("按你的节奏读");
-    for (const [cls, text] of [["large", "切换大字"], ["paper", "切换纸页 / 夜间模式"]]) a.append(button(text, () => { document.body.classList.toggle(cls); write(KEY + "-settings", [...document.body.classList]); }, "option"));
+    for (const [cls, text] of [["large", "切换大字"], ["night", "切换纸页 / 夜间模式"]]) a.append(button(text, () => { document.body.classList.toggle(cls); write(KEY + "-settings", [...document.body.classList].filter(x => ["large", "paper", "night"].includes(x))); }, "option"));
+    novel.settings(a);
+    if (state && !state.pending && !state.ending && library.read.includes(state.scene)) a.append(button("跳过已读正文", () => { close(); state.vn = { version: 1, scene: state.scene, phase: "choice", index: B.novelFrames(format(B.scenes[state.scene].text)).length - 1 }; render(false); }, "option"));
     a.append(node("p", "正文不设阅读倒计时。已读内容可快进；选择反馈和证据仍由你决定是否查看。系统会遵循设备的减少动态效果设置。"));
   }
   $("reading-settings").onclick = settings;
@@ -221,24 +206,26 @@
     const a = modal("分享这个故事"), input = node("input"); input.value = url; input.readOnly = true; input.style.width = "100%";
     input.onclick = () => input.select(); a.append(input, button("复制链接", async () => { try { await navigator.clipboard.writeText(url); message("已复制。"); } catch { input.select(); message("请长按或使用复制命令。"); } }, "option"));
   }
-  $("menu").onclick = () => {
+  function menu() {
     const a = modal("属于你的手账"), grid = node("div", undefined, "menu-grid");
     [["选择与线索", journal], ["存档 / 导入导出", slots], ["回忆图鉴", gallery], ["结局回收", endingShelf], ["阅读设置", settings], ["分享故事", share]].forEach(([title, fn]) => grid.append(button(title, fn)));
     a.append(grid, node("p", "现实机构仅用作虚构人物的背景；回声项目、争议及相关人员均属虚构。", "muted"));
-  };
+  }
+  $("menu").onclick = menu; $("cover-menu").onclick = menu;
   function finish() {
     activityUI.cancel();
-    const e = B.endings[state.ending], art = B.presentationArt(e.art, state, true); show("ending"); reveal(art);
+    const e = B.endings[state.ending], art = B.presentationArt(e.art, state, true); show("reader"); reveal(art);
     if (!library.endings.includes(state.ending)) { library.endings.push(state.ending); write(KEY + "-library", library); }
-    const wrap = node("div", undefined, "ending-wrap"); wrap.append(image(art), node("p", e.type, "eyebrow"), node("h1", e.title), node("p", e.subtitle, "lead"));
-    const text = node("div", undefined, "prose"); paragraphs(text, e.text); wrap.append(text);
-    wrap.append(button("回到首页", () => { show("cover"); refreshResume(); window.scrollTo(0, 0); }, "primary"), button("回看我的选择", journal, "option"), button("查看结局收藏", endingShelf, "option"));
-    $("ending").replaceChildren(wrap); window.scrollTo(0, 0);
+    novel.render(); $("view-art").onclick = () => fullArt(displayedArt);
   }
+  novel = B.createNovelReader({ state: () => state, format, save, choose, advance, sceneArt, node, button, activity: () => activityUI,
+    canUndo: () => !!undo.length, undo: () => { state = undo.pop(); }, home, journal, endingShelf, settings, close, message,
+    markRead: id => { if (!library.read.includes(id)) { library.read.push(id); write(KEY + "-library", library); } }
+  });
   activityUI = B.createActivityUI({ state: () => state, node, button, save, choose, render, fullArt, imageURL, setImageSource,
     displayArt: art => { readerArtDeck = [art]; readerArtIndex = 0; displayReaderArt(art); readerArtControls(); }
   });
   const settingsValue=read(KEY + "-settings", []);
-  for (const cls of Array.isArray(settingsValue)?settingsValue:[]) if (["large", "paper"].includes(cls)) document.body.classList.add(cls);
+  for (const cls of Array.isArray(settingsValue)?settingsValue:[]) if (["large", "paper", "night"].includes(cls)) document.body.classList.add(cls);
   refreshResume();
 })();

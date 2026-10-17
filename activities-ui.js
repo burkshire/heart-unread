@@ -143,6 +143,12 @@
         recordFor(api.state(), config).status = "paused"; api.save(); api.render(false); panel.scrollIntoView({ block: "start" });
       }, "art-step"));
       puzzle.replaceChildren(grid, tools);
+      if (document.getElementById("novel-stage")) requestAnimationFrame(() => {
+        if (!grid.isConnected || puzzle.hidden) return;
+        const style = getComputedStyle(puzzle), [rw, rh] = config.ratio.split("/").map(Number);
+        const available = puzzle.clientHeight - tools.getBoundingClientRect().height - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) - 5;
+        grid.style.width = Math.min(puzzle.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight), Math.max(132, available * rw / rh)) + "px";
+      });
       // The reference also supplies the JPEG fallback URL to the CSS pieces.
       const key = config.id + api.imageURL(config.art);
       if (referenceKey !== key) referenceKey = key;
