@@ -1,0 +1,50 @@
+.school-theater .scene-wash{background-image:url("v3-school-heroine.webp")}
+.school-theater[data-mode="choice"] .artwork,.school-theater[data-mode="reflect"] .artwork,.school-theater[data-mode="graduate"] .artwork,.school-theater[data-mode="ending"] .artwork{left:0;transform:none;width:59%;object-position:50% 25%}
+.school-theater[data-mode="story"] .artwork,.school-theater[data-mode="feedback"] .artwork{object-position:50% 26%}
+.school-panel{border-top:3px solid #c49aa9}
+.school-panel .growth-kicker{display:flex;align-items:center;gap:8px;letter-spacing:.1em}
+.school-panel .growth-kicker:before{content:"";height:5px;width:5px;border-radius:50%;background:#bd8e9e;flex-shrink:0}
+.school-subtitle{font:16px/1.9 var(--serif);color:#8d6878;margin:3px 0 16px;letter-spacing:.04em}
+.school-start-copy{font-size:13px;line-height:1.95;color:#806876;margin:0 0 14px}
+.school-chapter-strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;margin:18px 0}
+.school-term{font-size:10px;line-height:1.5;color:#a58c96;border-bottom:2px solid #e6d6dc;padding:5px 0 9px;text-align:center;white-space:pre-line}
+.school-term.current{color:#835066;border-color:#a9768d}
+.school-term.finished{color:#9b7186;border-color:#cfb4c0}
+.school-stage-note{font-size:11px;line-height:1.9;padding:10px 12px;background:#f3e6e7;border-radius:6px;color:#8c6376;margin:0 0 14px}
+.school-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.school-grid .growth-option{min-height:94px;padding:12px}
+.school-grid .growth-option strong{font-family:var(--serif);font-size:15px;line-height:1.6}
+.school-grid .growth-option small{font-size:10px;line-height:1.75}
+.school-detail-note{border-left:2px solid #ceb0bd;padding-left:12px;font-size:11px;line-height:1.9;color:#8f6c7d;margin:0 0 16px}
+.school-sheet .growth-metrics{grid-template-columns:repeat(4,minmax(0,1fr))}
+.school-sheet .growth-metric{padding:10px 8px}
+.school-sheet .growth-metric b{font-size:22px}
+.school-interest{padding:13px;border:1px solid #e2cdd6;border-radius:8px;background:#fffaf6;margin:9px 0}
+.school-interest strong{font:500 16px/1.7 var(--serif);color:#795067;display:block}
+.school-interest p{font-size:11px;line-height:1.9;color:#937284;margin:6px 0 0;white-space:pre-line}
+.school-track{height:3px;background:#e9dce1;border-radius:3px;margin:9px 0 5px;overflow:hidden}
+.school-track span{display:block;height:100%;background:#b8899e;border-radius:3px}
+.school-track-note{font-size:10px;color:#9e8291}
+.school-summary-section{border-top:1px solid #e4d2da;padding:15px 0 0;margin:18px 0 0}
+.school-summary-section h3{font:500 16px/1.7 var(--serif);color:#795267;margin:0 0 7px}
+.school-summary-section p{font-size:12px;line-height:1.9;color:#8c6b7c;margin:0;white-space:pre-line}
+.school-graduation-mark{font-size:10px;letter-spacing:.2em;color:#a98496;margin:0 0 12px}
+.school-panel .school-ending-title{font-size:25px}
+.school-panel .growth-ending-copy{font-size:16px;line-height:1.95}
+.school-ending-actions{margin-top:22px;display:grid;gap:8px}
+.school-ending-actions .sheet-button{text-align:center;text-decoration:none;display:block}
+.school-sheet .setting-row{margin-bottom:18px}
+.school-sheet .sheet-description{color:#927584}
+.school-theater .scene-badge{max-width:72%}
+.school-theater .chapter-label{overflow-wrap:anywhere}
+.school-theater .dialogue-text{white-space:pre-line;overflow-wrap:anywhere}
+.school-theater .scene-menu{padding-left:11px;padding-right:11px}
+.school-theater .dialogue{bottom:18px}
+.school-theater .next-button{min-height:44px}
+.school-theater[data-shape="wide"] .artwork{left:0;transform:none;width:100%;object-fit:contain;object-position:50% 26%}
+@media(min-width:1700px){.school-grid .growth-option{min-height:98px;padding:14px}.school-panel{max-height:calc(100% - 114px)}}
+@media(max-width:1000px) and (min-width:701px){.school-grid{grid-template-columns:1fr}.school-grid .growth-option{min-height:68px}.school-grid .growth-option strong{font-size:13px}.school-grid .growth-option small{font-size:10px}}
+@media(max-width:700px){.school-theater[data-mode] .artwork{left:0;transform:none;width:100%;object-position:50% 23%}.school-panel{max-height:calc(100% - 169px - env(safe-area-inset-bottom));padding:18px 16px}.school-grid{gap:7px}.school-grid .growth-option{min-height:98px;padding:11px}.school-grid .growth-option strong{font-size:13px}.school-grid .growth-option small{font-size:10px;line-height:1.65}.school-panel h1{font-size:26px}.school-subtitle{font-size:14px;margin-bottom:13px}.school-start-copy{font-size:12px;line-height:1.85}.school-theater .dialogue{bottom:calc(12px + env(safe-area-inset-bottom))}.school-theater .speaker-caption{max-width:52%}.school-sheet .growth-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.school-summary-section{padding-top:12px;margin-top:14px}.school-panel .growth-ending-copy{font-size:15px}.school-chapter-strip{margin:13px 0}.school-term{font-size:9px}.school-panel .school-ending-title{font-size:23px}}
+@media(max-width:360px){.school-panel{max-height:calc(100% - 142px - env(safe-area-inset-bottom));padding:15px 13px}.school-grid{grid-template-columns:1fr}.school-grid .growth-option{min-height:64px}.school-grid .growth-option strong{font-size:12px}.school-grid .growth-option small{font-size:10px}.school-panel .growth-kicker{font-size:9px}.school-theater .dialogue-text{font-size:17px;line-height:1.8}.school-theater .scene-badge{max-width:67%}.school-theater .chapter-label{font-size:10px}.school-theater .chapter-number{min-width:22px;padding-right:7px}}
+@media(max-height:560px) and (min-width:701px){.school-panel{max-height:calc(100% - 70px);padding:14px 16px}.school-grid .growth-option{min-height:75px;padding:9px}.school-grid .growth-option strong{font-size:12px}.school-grid .growth-option small{font-size:10px}.school-theater .dialogue{bottom:9px}.school-chapter-strip{margin:10px 0}.school-term{font-size:9px}.school-subtitle{font-size:14px}.school-start-copy{font-size:11px}.school-theater .dialogue-text{font-size:18px;line-height:1.7}}
+.school-theater .dialogue-text{font-size:var(--text-size)}

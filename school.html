@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta name="school-release" content="d19f5e3d5252">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4efeb">
+  <meta name="description" content="心动未读高中篇：从高一走向毕业，找到喜欢的事、一起长大的朋友，以及想继续探索的方向。">
+  <title>心动未读 · 未定的三年</title>
+  <link rel="preload" href="v3-school-heroine.webp" as="image" fetchpriority="high">
+  <link rel="stylesheet" href="demo.css?v=0c62a8ebbc32">
+  <link rel="stylesheet" href="growth.css?v=b595c68ce8b9">
+  <link rel="stylesheet" href="school.css?v=d19f5e3d5252">
+  <script src="school-data.js?v=d19f5e3d5252" defer></script>
+  <script src="school-core.js?v=d19f5e3d5252" defer></script>
+  <script src="school.js?v=d19f5e3d5252" defer></script>
+</head>
+<body>
+  <header class="masthead">
+    <a class="wordmark" href="school.html"><span class="mark" aria-hidden="true">♡</span> 心动未读</a>
+    <span class="masthead-caption">未定的三年 <span class="small-divider" aria-hidden="true"></span> 高中篇</span>
+    <a class="return-story" href="city.html" data-city-link>城市长篇（旧版）</a>
+  </header>
+  <main>
+    <section class="theater growth-theater school-theater" id="theater" data-shape="portrait" data-mode="start" aria-label="心动未读高中篇">
+      <div class="scene-wash" id="scene-wash" aria-hidden="true"></div>
+      <img class="artwork" id="artwork" src="v3-school-heroine.webp" alt="黑色长直发的你，在教室窗边翻开自己的草稿本" fetchpriority="high">
+      <div class="scene-shade" aria-hidden="true"></div>
+      <button class="advance-surface" id="advance-surface" aria-label="继续下一段" disabled></button>
+      <div class="scene-hud">
+        <div class="scene-badge"><span class="chapter-number" id="stage-number">序</span><div><span class="chapter-label" id="term-label">高一 · 入学以前</span><span class="place-label" id="stage-label">鹅市 · 春和高中</span></div></div>
+        <div class="hud-actions"><button class="scene-menu top-link" id="journal-button" hidden>手账</button><button class="scene-menu top-link" id="menu-button">菜单</button></div>
+      </div>
+      <div class="growth-status" id="status" hidden aria-label="当前课余资源"><span id="cash-status"></span><span id="energy-status"></span><span id="pressure-status"></span></div>
+      <section class="growth-panel school-panel" id="panel" aria-label="高中生活安排"></section>
+      <section class="dialogue" id="dialogue" hidden aria-label="当前片段">
+        <div class="dialogue-heading"><span class="speaker-dot" aria-hidden="true"></span><strong id="speaker">旁白</strong><span class="speaker-caption" id="caption">未定的三年</span><span class="page-mark" id="page-mark"></span></div>
+        <div class="dialogue-text" id="dialogue-text" aria-live="polite" aria-atomic="true"></div>
+        <div class="dialogue-footer"><span class="save-indicator" id="saved" title="高中篇单独自动保存"></span><button class="next-button" id="next"><span id="next-label">点击继续</span><span class="next-diamond" aria-hidden="true">◇</span></button></div>
+      </section>
+      <div class="loading-note" id="loading-note" role="status" hidden>正在展开这一幕…</div>
+    </section>
+    <footer class="demo-footer"><p><span class="footer-line" aria-hidden="true"></span> 想成为什么样的人，可以慢慢发现。</p><span>六个学期 · 二十四段校园生活</span></footer>
+  </main>
+  <dialog class="sheet school-sheet" id="sheet" aria-labelledby="sheet-title">
+    <div class="sheet-header"><div><span class="sheet-kicker">那些一起长大的日子</span><h2 id="sheet-title">高中手账</h2></div><button class="close-button" id="close-sheet" aria-label="关闭窗口">×</button></div>
+    <div class="sheet-body" id="sheet-body"></div>
+  </dialog>
+  <input id="import-file" type="file" accept="application/json,.json" hidden>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <noscript><p class="no-script">请开启 JavaScript 后开始高中生活。</p></noscript>
+</body>
+</html>
