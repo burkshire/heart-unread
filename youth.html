@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta name="youth-release" content="aeb9a012c2cf">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#eee8e4">
+  <meta name="description" content="鹅市·实验高中：从高一到毕业，在课余安排、朋友、作品、爱好与真实尝试中，慢慢找到自己的方向。">
+  <title>心动未读 · 未定的三年</title>
+  <link rel="stylesheet" href="campus-demo.css?v=aeb9a012c2cf">
+  <link rel="stylesheet" href="youth.css?v=aeb9a012c2cf">
+  <script src="youth-data.js?v=aeb9a012c2cf" defer></script>
+  <script src="youth-core.js?v=aeb9a012c2cf" defer></script>
+  <script src="youth.js?v=aeb9a012c2cf" defer></script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="youth.html"><span class="brand-mark" aria-hidden="true">✳</span><span>心动未读<small>未定的三年</small></span></a><span class="school-name">鹅市·实验高中</span><span class="demo-stamp">高一 → 高三毕业</span></header>
+  <main class="game-shell">
+    <section class="stage youth-stage" id="stage" data-mode="welcome" data-phase="welcome" aria-label="心动未读完整高中篇">
+      <img class="backdrop" id="backdrop" src="youth-classroom.webp?v=aeb9a012c2cf" alt="阳光落在教室窗边的课桌上">
+      <div class="art-shade" aria-hidden="true"></div>
+      <div class="day-badge"><span class="day-number" id="round-number">01<small>/ 24</small></span><div><strong id="term-label">高一 · 第一学期</strong><span id="period-label">一张还没写满的时间表</span></div></div>
+      <div class="top-actions"><button id="journal-trigger">手账</button><button id="menu-trigger">菜单</button></div>
+      <div class="cast-stage" aria-hidden="true"><img id="companion" class="companion" alt="" hidden><img id="portrait" class="portrait" src="youth-heroine.webp?v=aeb9a012c2cf" alt=""></div>
+      <div class="resource-strip" id="resources" aria-label="本回合状态"></div>
+      <section class="paper-panel" id="panel" aria-label="生活安排"></section>
+      <section class="paper-panel game-panel" id="game-panel" aria-label="校园互动" hidden></section>
+      <section class="dialogue" id="dialogue" aria-label="当前故事" hidden><div class="dialogue-head"><strong id="speaker">你</strong><span id="dialogue-scene"></span><span id="page-count"></span></div><p id="dialogue-text" aria-live="polite" aria-atomic="true"></p><div class="dialogue-foot"><span id="save-note">自动记录这段生活</span><button id="next">继续 <span aria-hidden="true">▸</span></button></div></section>
+    </section>
+    <footer class="under-stage"><span><i aria-hidden="true"></i> 喜欢的事，可以认真试，也可以重新选。</span><span>六个学期 · 二十四段生活</span></footer>
+  </main>
+  <dialog id="sheet" aria-labelledby="sheet-title"><header><div><small>THE DAYS WE KEEP</small><h2 id="sheet-title">高中手账</h2></div><button id="close-sheet" aria-label="关闭窗口">×</button></header><div id="sheet-body"></div></dialog>
+  <input id="import-file" type="file" accept="application/json,.json" hidden>
+  <p id="toast" class="youth-toast" role="status" hidden></p>
+  <noscript>请开启 JavaScript 后开始高中生活。</noscript>
+</body>
+</html>
