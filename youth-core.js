@@ -3,7 +3,7 @@ window.HEART_YOUTH = (() => {
   const D = window.HEART_YOUTH_DATA;
   if (!D || !Array.isArray(D.rounds) || D.rounds.length !== 24) throw Error("高中故事资料尚未载入。");
   const SK = ["study", "express", "logic", "craft"], DK = ["design", "science", "humanities", "media"], PK = ["zhou", "cheng", "xu", "lin", "tang"];
-  const SC = ["classroom", "corridor", "noticeboard", "clubroom", "broadcast", "schoolyard", "school-gate"];
+  const SC = ["classroom", "corridor", "noticeboard", "clubroom", "broadcast", "schoolyard", "school-gate", "dormitory"];
   const GROUPS = ["event", "game", "study", "explore", "project", "social", "hobby", "rest"];
   const related = { design: ["craft", "express"], science: ["logic", "study"], humanities: ["express", "study"], media: ["express", "craft"] };
   const projectNames = { design: "实验高中的角落说明书", science: "纸桥承重实验记录", humanities: "校园里没写进校史的故事", media: "星期五声音小刊" };
@@ -45,7 +45,7 @@ window.HEART_YOUTH = (() => {
   }
   function create(name = "夏宁", seed = 1) {
     return { version: 2, name: String(name).trim().slice(0, 12) || "夏宁", seed: Number(seed) >>> 0, round: 0, phase: "opening", page: 0,
-      energy: 10, actions: 0, stress: 12, cash: 120,
+      energy: 10, actions: 0, stress: 12, cash: 20,
       skills: Object.fromEntries(SK.map(k => [k, 1])), interests: Object.fromEntries(DK.map(k => [k, 0])), bonds: Object.fromEntries(PK.map(k => [k, 0])),
       projects: Object.fromEntries(DK.map(k => [k, null])), visits: Object.fromEntries(PK.map(k => [k, [0, 0, 0, 0, 0, 0]])),
       works: [], flags: {}, completedGames: {}, doneEvents: [], roundActions: [], journal: [], feedback: null, game: null,
@@ -87,7 +87,7 @@ window.HEART_YOUTH = (() => {
   function scene(s) {
     const r = D.rounds[s.round];
     let title = r.title, lines = [], sceneId = r.sceneId, personId = "heroine";
-    if (s.phase === "opening") lines = screens(r.opening);
+    if (s.phase === "opening") { lines = screens(r.opening); if (s.round === 0) sceneId = "dormitory"; }
     else if (s.phase === "plan") { title = "这一回合，时间由你安排"; lines = [`本回合精力${s.energy}/10；每项行动固定花3点，最多安排三件事，也可以提前结束。`]; }
     else if (s.phase === "event") { title = r.event.title; lines = screens(r.event.lines); sceneId = r.event.sceneId; personId = r.event.personId; }
     else if (s.phase === "game") { const g = D.games[s.game.id]; title = g.title; lines = screens([g.prompt]); sceneId = g.sceneId; personId = g.personId; }

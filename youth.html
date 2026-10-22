@@ -1,33 +1,39 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta name="youth-release" content="aeb9a012c2cf">
+  <meta name="youth-release" content="55060a2e174b">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#eee8e4">
   <meta name="description" content="鹅市·实验高中：从高一到毕业，在课余安排、朋友、作品、爱好与真实尝试中，慢慢找到自己的方向。">
   <title>心动未读 · 未定的三年</title>
-  <link rel="stylesheet" href="campus-demo.css?v=aeb9a012c2cf">
-  <link rel="stylesheet" href="youth.css?v=aeb9a012c2cf">
-  <script src="youth-data.js?v=aeb9a012c2cf" defer></script>
-  <script src="youth-core.js?v=aeb9a012c2cf" defer></script>
-  <script src="youth.js?v=aeb9a012c2cf" defer></script>
+  <link rel="stylesheet" href="campus-demo.css?v=55060a2e174b">
+  <link rel="stylesheet" href="youth.css?v=55060a2e174b">
+  <script src="youth-data.js?v=55060a2e174b" defer></script>
+  <script src="youth-core.js?v=55060a2e174b" defer></script>
+  <script src="youth-campus.js?v=55060a2e174b" defer></script>
+  <script src="youth.js?v=55060a2e174b" defer></script>
+<script>window.YOUTH_IMAGES={"heroine":"youth-heroine.webp?v=55060a2e174b","zhou":"youth-zhou.webp?v=55060a2e174b","cheng":"youth-cheng.webp?v=55060a2e174b","xu":"youth-xu.webp?v=55060a2e174b","lin":"youth-lin.webp?v=55060a2e174b","tang":"youth-tang.webp?v=55060a2e174b","classroom":"youth-classroom.webp?v=55060a2e174b","club":"youth-club.webp?v=55060a2e174b","schoolyard":"youth-schoolyard.webp?v=55060a2e174b","campus-map":"youth-campus-map.webp?v=55060a2e174b","campus-cafeteria":"youth-campus-cafeteria.webp?v=55060a2e174b","campus-club":"youth-campus-club.webp?v=55060a2e174b","campus-sports":"youth-campus-sports.webp?v=55060a2e174b","campus-artroom":"youth-campus-artroom.webp?v=55060a2e174b","campus-library":"youth-campus-library.webp?v=55060a2e174b","campus-dormitory":"youth-campus-dormitory.webp?v=55060a2e174b"};</script>
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="youth.html"><span class="brand-mark" aria-hidden="true">✳</span><span>心动未读<small>未定的三年</small></span></a><span class="school-name">鹅市·实验高中</span><span class="demo-stamp">高一 → 高三毕业</span></header>
   <main class="game-shell">
     <section class="stage youth-stage" id="stage" data-mode="welcome" data-phase="welcome" aria-label="心动未读完整高中篇">
-      <img class="backdrop" id="backdrop" src="youth-classroom.webp?v=aeb9a012c2cf" alt="阳光落在教室窗边的课桌上">
+      <div id="game-world" class="game-world">
+      <img class="backdrop" id="backdrop" src="youth-campus-dormitory.webp?v=55060a2e174b" alt="海风与阳光经过整洁的宿舍书桌">
       <div class="art-shade" aria-hidden="true"></div>
-      <div class="day-badge"><span class="day-number" id="round-number">01<small>/ 24</small></span><div><strong id="term-label">高一 · 第一学期</strong><span id="period-label">一张还没写满的时间表</span></div></div>
+      <div class="ambient-light" aria-hidden="true"></div>
+      <div class="day-badge"><span class="day-number" id="round-number">01<small>/ 24</small></span><div><span class="in-stage-school">鹅市·实验高中</span><strong id="term-label">高一 · 第一学期</strong><span id="period-label">一张还没写满的时间表</span></div></div>
       <div class="top-actions"><button id="journal-trigger">手账</button><button id="menu-trigger">菜单</button></div>
-      <div class="cast-stage" aria-hidden="true"><img id="companion" class="companion" alt="" hidden><img id="portrait" class="portrait" src="youth-heroine.webp?v=aeb9a012c2cf" alt=""></div>
+      <div class="cast-stage" aria-hidden="true"><img id="companion" class="companion" alt="" hidden><img id="portrait" class="portrait" src="youth-heroine.webp?v=55060a2e174b" alt=""></div>
       <div class="resource-strip" id="resources" aria-label="本回合状态"></div>
       <section class="paper-panel" id="panel" aria-label="生活安排"></section>
       <section class="paper-panel game-panel" id="game-panel" aria-label="校园互动" hidden></section>
       <section class="dialogue" id="dialogue" aria-label="当前故事" hidden><div class="dialogue-head"><strong id="speaker">你</strong><span id="dialogue-scene"></span><span id="page-count"></span></div><p id="dialogue-text" aria-live="polite" aria-atomic="true"></p><div class="dialogue-foot"><span id="save-note">自动记录这段生活</span><button id="next">继续 <span aria-hidden="true">▸</span></button></div></section>
+      </div>
+      <section id="time-transition" class="time-transition" role="dialog" aria-modal="true" aria-labelledby="transition-title" hidden>
+        <div class="time-card"><p class="kicker">日历翻到下一页</p><h2 id="transition-title"></h2><p id="transition-from" class="time-from"></p><span class="time-rule" aria-hidden="true"></span><p id="transition-to" class="time-to"></p><p id="transition-caption"></p><button id="skip-transition" class="secondary">跳过过场</button></div>
+      </section>
     </section>
-    <footer class="under-stage"><span><i aria-hidden="true"></i> 喜欢的事，可以认真试，也可以重新选。</span><span>六个学期 · 二十四段生活</span></footer>
   </main>
   <dialog id="sheet" aria-labelledby="sheet-title"><header><div><small>THE DAYS WE KEEP</small><h2 id="sheet-title">高中手账</h2></div><button id="close-sheet" aria-label="关闭窗口">×</button></header><div id="sheet-body"></div></dialog>
   <input id="import-file" type="file" accept="application/json,.json" hidden>
